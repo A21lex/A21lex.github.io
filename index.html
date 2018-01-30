@@ -1,7 +1,43 @@
-﻿<!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>D3 Page Template</title>
+<script type="text/javascript" src="d3.js"></script>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<script type="text/javascript">
+//your code goes here
+var dataset = [5, 10, 15, 20, 25];
+//d3.select("body").append("p").text("New	paragraph!");
+d3.select("body").selectAll("p")
+.data(dataset) // counts the elems in dataset and parses them, also magic that allows anonymous func to process data elements 1 by 1
+.enter()            // creates placeholders for not yet existing DOM elems
+.append("p").
+text(function(d) { return "I can count up to " + d; }).
+style("color", function(d){    // style applies CSS styles directly to an element, whereas attr sets DOM attribute values.
+	if (d > 15){
+		return "red";
+	}
+	else {
+		return "black";
+	}
+});
+
+var rowConverter = function(d) {
+	return {
+		Food: d.Food,
+		Deliciousness: parseFloat(d.Deliciousness)
+	}
+};
+d3.csv("food.csv", rowConverter, function(error, data)	{
+if (error){
+	console.log(error);
+}
+else{
+	console.log(data); 
+}
+});
+</script>
 </body>
 </html>
