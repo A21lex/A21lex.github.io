@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style type = "text/css">
+p {
+	font-size: 24px;
+	font-weight: bold;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+</style>
+<meta charset="utf-8">
+<title>Exercises from lecture 1 and 2 for now</title>
+<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+<style>
+.axis path,
+.axis line {
+	fill: none;
+	stroke: black;
+	shape-rendering: crispEdges;
+}
+
+.axis text{
+ font-family: sans-serif;
+ font-size: 11px;
+}
+
+.bars rect {
+	fill: steelblue;
+	}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+</style>
+</head>
+<body>
+<div id="start"></div>
+ 
+<div id="finish"></div>
+ 
+ <script type="text/javascript">
+
+
+//LECTURE 2 - drawing stuff
+d3.select("#start")
+.append("p")
+.text("Lecture 2");
+	
+var width = 295;
+var height = 220;
+var sidePadding = 19;
+	 
+//Load data from presidents.csv
+
+var presidentDataset = [];
+var yearInt = function(row){
+	return{
+	  President: row.President,
+	  Months: parseFloat(row.Months)
+	}
+}
+
+d3.csv("presidents.csv", yearInt, function(data) {
+	console.log(data);
+	
+	data.map(function(d){
+	   presidentDataset.push([d.President,d.Months]); // push both values to created array
+	})
+	createScatterPlots();
+	createHistogram();
+	
+});
+	 
+var xScale = d3.scaleLinear()
+	.domain([0,160])
+	.rangeRound([sidePadding,width-sidePadding]);
+	
+var createScatterPlots = function(){
+
+	var xAxis = d3.axisBottom()
+	
+	.scale(xScale); // labels will appear to the bottom of the axis
+	
+	
+	var scatterSvg = d3.select("#start")
+	.append("svg")
+	.attr("width", width)
+    .attr("height", (height-40))
+	.append("g");
+	//.attr("transform","translate(4,0)"); // move our svg to the right
+	
+	scatterSvg.selectAll("circle")
+	.data(presidentDataset)
+	.enter()
+	.append("circle")
+	.attr("cx", function(d) { //x coordinate depends on the months number (scaled by xScale defined above)
+	return xScale(d[1]);
+	})
+	.attr("cy", function(d) { //y will be randomized
+	return Math.random()*(90-50) + 50;	
+	})
+	.attr("r", function(d){
+	return Math.sqrt(30);
+	})
+	.attr("fill", "none")
+	.attr("stroke", "black");
+	//.attr("transform","translate(3,0)"); //NOT SURE
+	
+	scatterSvg.selectAll("text")
+	.data(presidentDataset)
+	.enter()
+	.append("text")
+	.text("x")
+	.attr("x", function(d) {
+	return xScale(d[1]);
+	})
+	.attr("y", 20)
+	.attr("font-family", "sans-serif")
+	.attr("font-size", "14px")
+	.attr("fill", "black")
+	.attr("text-anchor", "middle");
+	//.attr("transform","translate(3,0)"); //NOT SURE
+	
+	scatterSvg.append("g").attr("class","axis").attr("transform","translate(0,110)").call(xAxis); // transform the xAxis to go +120 y // X=3? NOT SURE
+	scatterSvg.append("text").text("Months in Office").attr("x",width/2).attr("y",160).attr("font-family", "sans-serif")
+	.attr("font-size", "14px")
+	.attr("fill", "black")
+	.attr("text-anchor", "middle");
+	
+	//scatterSvg.axis().orient("bottom");
+
+}
+
+var monthsOnly = []; // get numbers of months from presidents
+var bar;
+	 
+var createHistogram = function(){
+	var botPadding = 20;
+	for (var i = 0; i < presidentDataset.length; i++){
+		//console.log("lol");
+		monthsOnly.push(presidentDataset[i][1]);
+	}
+	var histogramSvg = d3.select("#finish")
+	.append("svg")
+	.attr("width", width)
+    .attr("height", height)
+	.append("g");
+	console.log("height at this point is: " + height);
+	// Generate a histogram using six uniformly-spaced bins.
+	var bins = d3.histogram()
+		.domain(xScale.domain())
+    	.thresholds(xScale.ticks(6))
+    	(monthsOnly);
+
+	// Now also need y scale
+	var yMax = d3.max(bins, function(d){return d.length});
+	var yMin = d3.min(bins, function(d){return d.length});
+	var color = "steelblue";
+	var colorScale = d3.scaleLinear()
+					   .domain([yMin, yMax])
+					   .range([d3.rgb(color).brighter(), d3.rgb(color).darker()]);
+	var yScale = d3.scaleLinear()
+				   .domain([0,yMax])
+				   .range([height-botPadding, botPadding]);
+	
+	bar = histogramSvg.selectAll(".bar")
+	.data(bins)
+	.enter()
+	.append("g")
+	.attr("class", "bar")
+	.attr("transform", function(d) { return "translate(" + xScale(d.x0) + "," + yScale(d.length) + ")"; }); // move the bar to its x0 location (leftside of the bar)
+	
+	bar.append("rect")
+	   .attr("x",1)
+	   .attr("width", (xScale(bins[0].x1) - xScale(bins[0].x0)) -2) // 2 is to make bars a bit smaller
+	   .attr("height", function(d) {return height - yScale(d.length) - botPadding; })
+	   .style("stroke-dasharray", "3,3")
+	   .style("fill","none")
+	   .style("stroke", "black");
+	
+	bar.append("text")
+		.attr("dy", ".75em")
+		.attr("y",6)
+		.attr("x", (xScale(bins[0].x1) - xScale(bins[0].x0))/2)
+		.attr("text-anchor","middle")
+		.text(function(d){
+			if (d.length>=3){
+			return d.length;
+			}
+		});
+
+	// Add the axis
+  	histogramSvg.append("g")
+	  .attr("class", "axis")
+      .attr("transform", "translate(0," + (height-botPadding) + ")")
+      .call(d3.axisBottom().scale(xScale));
+	
+	histogramSvg.append("g")
+		.attr("class","axis")
+		.attr("transform", "translate(" + (sidePadding) + ",0)")
+		.call(d3.axisLeft().scale(yScale));
+
+
+
+
+
+
+
+
+
+}
+</script>
+</body>
+</html>
