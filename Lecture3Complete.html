@@ -7,17 +7,10 @@ p {
 	font-weight: bold;
 	font-family: Arial, Helvetica, sans-serif;
 }
-div.bar{
-display:	inline-block;	
-width:	20px;				
-height:	75px;			/*	We'll	override	height	later	*/				
-background-color:	teal; 
-margin-right: 2px;
-}
 </style>
 <meta charset="utf-8">
 <title>Exercises from lecture 1 and 2 for now</title>
-<script type="text/javascript" src="d3.js"></script>
+<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 <style>
 .axis path,
 .axis line {
@@ -72,7 +65,6 @@ else{
 	})
 	console.log(data); 
 	generateVisualization();
-	createBarChart();
 }
 });
 
@@ -111,18 +103,7 @@ style("color", function(d){    // style applies CSS styles directly to an elemen
 		return "black";
 	}
 }); */
-// Create a simple bar chart with the height dependent on the data value
-var createBarChart = function(){
-	d3.select("body").selectAll("div")
-.data(dataset)
-.enter()
-.append("div")
-.attr("class","bar")
-.style("height", function(d) {
-var barHeight = d*5;
-return barHeight + "px";
-});
-};
+
 // Parsing floats from deliciousness level of food for csv test
 var rowConverter = function(d) {
 	return {
@@ -140,98 +121,5 @@ else{
 });
 </script>
 
-
-
-
- 
- <script type="text/javascript">
-
-
-//LECTURE 2 - drawing stuff
-d3.select("#finish")
-.append("p")
-.text("Lecture 2");
-	
-var width = 295;
-var height = 200;
-
-//Load data from presidents.csv
-
-var presidentDataset = [];
-var yearInt = function(row){
-	return{
-	  President: row.President,
-	  Months: parseFloat(row.Months)
-	}
-}
-d3.csv("presidents.csv", yearInt, function(data) {
-	console.log(data);
-	data.map(function(d){
-	   presidentDataset.push([d.President,d.Months]); // push both values to created array
-	})
-	createScatterPlots();
-});
-var xScale = d3.scale.linear()
-	.domain([0,160])
-	.range([0,width]);
-	
-var createScatterPlots = function(){
-
-	var xAxis = d3.svg.axis()
-	.ticks(11)
-	.scale(xScale)
-	.orient("bottom"); // labels will appear to the bottom of the axis
-	
-	
-	var scatterSvg = d3.select("#finish")
-	.append("svg")
-	.append("g")
-	.attr("width", width)
-    .attr("height", height)
-	.attr("transform","translate(4,0)"); // move our svg to the right
-	
-	scatterSvg.selectAll("circle")
-	.data(presidentDataset)
-	.enter()
-	.append("circle")
-	.attr("cx", function(d) { //x coordinate depends on the months number (scaled by xScale defined above)
-	return xScale(d[1]);
-	})
-	.attr("cy", function(d) { //y will be randomized
-	return Math.random()*(90-50) + 50;	
-	})
-	.attr("r", function(d){
-	return Math.sqrt(30);
-	})
-	.attr("fill", "none")
-	.attr("stroke", "black");
-	//.attr("transform","translate(3,0)"); //NOT SURE
-	
-	scatterSvg.selectAll("text")
-	.data(presidentDataset)
-	.enter()
-	.append("text")
-	.text("x")
-	.attr("x", function(d) {
-	return xScale(d[1]);
-	})
-	.attr("y", 20)
-	.attr("font-family", "sans-serif")
-	.attr("font-size", "14px")
-	.attr("fill", "black")
-	.attr("text-anchor", "middle");
-	//.attr("transform","translate(3,0)"); //NOT SURE
-	
-	scatterSvg.append("g").attr("class","axis").attr("transform","translate(0,120)").call(xAxis); // transform the xAxis to go +120 y // X=3? NOT SURE
-	scatterSvg.append("text").text("Months in Office").attr("x",width/2).attr("y",150).attr("font-family", "sans-serif")
-	.attr("font-size", "14px")
-	.attr("fill", "black")
-	.attr("text-anchor", "middle");
-	
-	//scatterSvg.axis().orient("bottom");
-	
-
-}
-</script>
 </body>
 </html>
