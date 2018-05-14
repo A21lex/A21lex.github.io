@@ -9,11 +9,11 @@
                 codestring = d.zip;
                 zipPopulation[codestring.toString()] = parseInt(d.population_2015);  
             });
+            loadsection1() ;
     })
 
     //read number of zip codes
     //Zip codes and number of incidents
-    var zipcodesaux = [];
     var currentyear = "2013";
     var zipcodesAll = {};
     var totalincAll = {};
@@ -23,6 +23,7 @@
     /*
      * This creates an array for every year containing the scale, distribution of incidents per zip code, per year
      */
+    function loadsection1() {
     d3.csv("incidents_year/zipcodesAll.csv", function(data){
             indexincidents = 0;
             zipcodesAll[currentyear] = {};
@@ -78,6 +79,7 @@
             loaddatamap(zipcodesAll["2013"],totalincAll["2013"]);
             loadtimeline2013();
     })
+    }
     
     var incidentsMonthYear = {};
     var incidentsMonthYear_zip = {};
@@ -296,8 +298,7 @@
                     }).entries(data);
             maxunitsdata13 = maxunitsdata; // store
                     loadinfomap3();
-        });
-    d3.csv("full_csv_year_files/2014full.csv", unitsNumbers, function(data){
+                    d3.csv("full_csv_year_files/2014full.csv", unitsNumbers, function(data){
         
             maxunitsdata14 = d3.nest()
                     .key(function(d){return d.ZIP_CODE;})
@@ -305,7 +306,10 @@
                             return d3.max(d, function(g){return g.UNITS_ONSCENE;});
                     }).entries(data);
                     loadinfomap3();
+                    spinner2.stop(); // .. d3 stuff...
         });
+        });
+    
     d3.csv("full_csv_year_files/2015full.csv", unitsNumbers, function(data){
         
             maxunitsdata15 = d3.nest()
@@ -313,7 +317,7 @@
                     .rollup(function(d){
                             return d3.max(d, function(g){return g.UNITS_ONSCENE;});
                     }).entries(data);
-                    loadinfomap3();
+                    //loadinfomap3();
         });
     d3.csv("full_csv_year_files/2016full.csv", unitsNumbers, function(data){
         
@@ -322,7 +326,7 @@
                     .rollup(function(d){
                             return d3.max(d, function(g){return g.UNITS_ONSCENE;});
                     }).entries(data);
-                    loadinfomap3();
+                    //loadinfomap3();
         });
     d3.csv("full_csv_year_files/2017full.csv", unitsNumbers, function(data){
         
@@ -331,12 +335,14 @@
                     .rollup(function(d){
                             return d3.max(d, function(g){return g.UNITS_ONSCENE;});
                     }).entries(data);
-                    loadinfomap3();
+                    //loadinfomap3();
+
         });
     
     // Load the csv with the most severe incidents
     var severestdata;
     d3.csv("full_csv_year_files/biggestincidentsalltime.csv", unitsNumbers, function(data){
         severestdata = data; // much simpler here as all data is already in csv
+        //spinner2.stop();
     })
     
